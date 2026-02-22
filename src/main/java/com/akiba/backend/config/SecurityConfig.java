@@ -1,7 +1,6 @@
 package com.akiba.backend.config;
 
 import com.akiba.backend.config.jwt.TokenProvider;
-import com.akiba.backend.user.service.NaverOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,28 +15,30 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final NaverOAuth2UserService naverOAuth2UserService;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
-    private final TokenProvider tokenProvider; // 추가
+    private final TokenProvider tokenProvider;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 .addFilterBefore(new JwtAuthenticationFilter(tokenProvider),
-                        UsernamePasswordAuthenticationFilter.class) // 추가
+                        UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll()
+                                .anyRequest().permitAll()
+
+                        /* test끝나면
+                            .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/users/login").permitAll()
                         .anyRequest().authenticated()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(naverOAuth2UserService)
                         )
-                        .successHandler(oAuth2SuccessHandler)
+                        test할때는
+                            .authorizeHttpRequests(auth -> auth
+                            .anyRequest().permitAll()
+                            )
+                         */
                 )
                 .build();
     }

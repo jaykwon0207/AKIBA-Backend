@@ -13,3 +13,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+
+# naver developers
+# Client ID : ZfdrzEhizfq8bi0KaKTQ
+# Client Secret : 9I4q2EEejE

@@ -29,8 +29,13 @@ public class BoardPost {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Column(length = 500)
+    private String saleOrAuctionLink;
+
     private int likeCount;
     private int commentCount;
+    private int authenticVoteCount;
+    private int fakeVoteCount;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -44,5 +49,51 @@ public class BoardPost {
     @PreUpdate
     void preUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
+    }
+
+    public void increaseCommentCount() {
+        this.commentCount++;
+    }
+
+    public void decreaseCommentCount() {
+        if (this.commentCount > 0) {
+            this.commentCount--;
+        }
+    }
+
+    public void updatePost(String title, String content, String saleOrAuctionLink) {
+        this.title = title;
+        this.content = content;
+        this.saleOrAuctionLink = saleOrAuctionLink;
+    }
+
+    public void increaseVoteCount(AuthenticityVoteChoice choice) {
+        if (choice == AuthenticityVoteChoice.AUTHENTIC) {
+            this.authenticVoteCount++;
+            return;
+        }
+        this.fakeVoteCount++;
+    }
+
+    public void decreaseVoteCount(AuthenticityVoteChoice choice) {
+        if (choice == AuthenticityVoteChoice.AUTHENTIC) {
+            if (this.authenticVoteCount > 0) {
+                this.authenticVoteCount--;
+            }
+            return;
+        }
+        if (this.fakeVoteCount > 0) {
+            this.fakeVoteCount--;
+        }
     }
 }

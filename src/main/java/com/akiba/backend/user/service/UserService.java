@@ -6,6 +6,8 @@ import com.akiba.backend.user.domain.User;
 import com.akiba.backend.user.domain.UserProfile;
 import com.akiba.backend.user.dto.LoginRequest;
 import com.akiba.backend.user.dto.LoginResponse;
+import com.akiba.backend.user.dto.NicknameRequest;
+import com.akiba.backend.user.dto.NicknameResponse;
 import com.akiba.backend.user.repository.UserProfileRepository;
 import com.akiba.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -104,5 +106,18 @@ public class UserService {
                 Map.class
         );
         return response.getBody();
+    }
+
+    @Transactional
+    public NicknameResponse updateNickname(Long userId, NicknameRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+        user.updateNickname(request.getNickname());
+
+        return NicknameResponse.builder()
+                .userId(user.getUserId())
+                .nickname(user.getNickname())
+                .build();
     }
 }

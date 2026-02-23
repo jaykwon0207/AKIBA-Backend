@@ -51,4 +51,9 @@ public class User {
     void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }

@@ -120,6 +120,8 @@ public class UserService {
         return response.getBody();
     }
 
+
+    //닉네임 변경 ->DB에 닉네임 저장
     @Transactional
     public NicknameResponse updateNickname(Long userId, NicknameRequest request) {
         User user = userRepository.findById(userId)
@@ -136,5 +138,13 @@ public class UserService {
     //닉네임 중복 체크
     public boolean checkNickname(String nickname) {
         return !userRepository.existsByNickname(nickname);
+    }
+
+    // 회원탈퇴
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+        user.delete();
     }
 }

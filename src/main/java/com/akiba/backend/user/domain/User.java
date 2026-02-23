@@ -52,7 +52,14 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
+
+    //닉네임 변경
     public void updateNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    //로그아웃
+    public void delete() {
+        this.status = UserStatus.DELETED;
     }
 }

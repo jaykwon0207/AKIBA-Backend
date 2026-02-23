@@ -45,6 +45,12 @@ public class UserController {
         return ResponseEntity.ok(Map.of("available", available, "message", message));
     }
 
+    //탈퇴
+    @DeleteMapping
+    public ResponseEntity<Map<String, String>> deleteUser(@AuthenticationPrincipal Long userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.ok(Map.of("message", "회원탈퇴가 완료되었습니다."));
+    }
 
 
 }

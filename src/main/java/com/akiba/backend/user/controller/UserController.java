@@ -1,9 +1,6 @@
 package com.akiba.backend.user.controller;
 
-import com.akiba.backend.user.dto.LoginRequest;
-import com.akiba.backend.user.dto.LoginResponse;
-import com.akiba.backend.user.dto.NicknameRequest;
-import com.akiba.backend.user.dto.NicknameResponse;
+import com.akiba.backend.user.dto.*;
 import com.akiba.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -52,5 +49,16 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "회원탈퇴가 완료되었습니다."));
     }
 
+
+    @GetMapping("/me")
+    public ResponseEntity<UserInfoResponse> getMyInfo(@AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(userService.getMyInfo(userId));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UpdateUserResponse> updateMyInfo(@AuthenticationPrincipal Long userId,
+                                                           @RequestBody UpdateUserRequest request) {
+        return ResponseEntity.ok(userService.updateMyInfo(userId, request));
+    }
 
 }

@@ -44,6 +44,14 @@ public class UserProfile {
         }
     }
 
+    public void updateBio(String bio) {
+        this.bio = bio;
+    }
+
+    public void updateProfileImage(Long profileImageMediaId) {
+        this.profileImageMediaId = profileImageMediaId;
+    }
+
     @PreUpdate
     void preUpdate() {
         this.updatedAt = LocalDateTime.now();

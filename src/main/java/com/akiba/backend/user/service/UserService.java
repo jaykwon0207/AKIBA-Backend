@@ -5,10 +5,7 @@ import com.akiba.backend.user.domain.AuthProvider;
 import com.akiba.backend.user.domain.RefreshToken;
 import com.akiba.backend.user.domain.User;
 import com.akiba.backend.user.domain.UserProfile;
-import com.akiba.backend.user.dto.LoginRequest;
-import com.akiba.backend.user.dto.LoginResponse;
-import com.akiba.backend.user.dto.NicknameRequest;
-import com.akiba.backend.user.dto.NicknameResponse;
+import com.akiba.backend.user.dto.*;
 import com.akiba.backend.user.repository.RefreshTokenRepository;
 import com.akiba.backend.user.repository.UserProfileRepository;
 import com.akiba.backend.user.repository.UserRepository;
@@ -146,5 +143,50 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
         user.delete();
+    }
+
+    public UserInfoResponse getMyInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+        UserProfile profile = userProfileRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("프로필을 찾을 수 없습니다."));
+
+        return UserInfoResponse.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .provider(user.getProvider().name())
+                .status(user.getStatus().name())
+                .createdAt(user.getCreatedAt())
+                .bio(profile.getBio())
+                .profileImageMediaId(profile.getProfileImageMediaId())
+                .build();
+    }
+
+    //회원정보 수정
+    @Transactional
+    public UpdateUserResponse updateMyInfo(Long userId, UpdateUserRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+        UserProfile profile = userProfileRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("프로필을 찾을 수 없습니다."));
+
+        if (request.getNickname() != null) {
+            user.updateNickname(request.getNickname());
+        }
+        if (request.getBio() != null) {
+            profile.updateBio(request.getBio());
+        }
+        if (request.getProfileImageMediaId() != null) {
+            profile.updateProfileImage(request.getProfileImageMediaId());
+        }
+
+        return UpdateUserResponse.builder()
+                .userId(user.getUserId())
+                .nickname(user.getNickname())
+                .bio(profile.getBio())
+                .profileImageMediaId(profile.getProfileImageMediaId())
+                .message("회원정보 수정 성공")
+                .build();
     }
 }

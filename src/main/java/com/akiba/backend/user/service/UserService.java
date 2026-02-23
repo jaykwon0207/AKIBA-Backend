@@ -2,12 +2,14 @@ package com.akiba.backend.user.service;
 
 import com.akiba.backend.config.jwt.TokenProvider;
 import com.akiba.backend.user.domain.AuthProvider;
+import com.akiba.backend.user.domain.RefreshToken;
 import com.akiba.backend.user.domain.User;
 import com.akiba.backend.user.domain.UserProfile;
 import com.akiba.backend.user.dto.LoginRequest;
 import com.akiba.backend.user.dto.LoginResponse;
 import com.akiba.backend.user.dto.NicknameRequest;
 import com.akiba.backend.user.dto.NicknameResponse;
+import com.akiba.backend.user.repository.RefreshTokenRepository;
 import com.akiba.backend.user.repository.UserProfileRepository;
 import com.akiba.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final TokenProvider tokenProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${naver.client-id}")
     private String clientId;
@@ -71,6 +74,13 @@ public class UserService {
         String accessToken = tokenProvider.generateAccessToken(user.getUserId());
         String refreshToken = tokenProvider.generateRefreshToken(user.getUserId());
 
+        // 5. refreshToken DB 저장 (있으면 업데이트, 없으면 새로 저장)
+        refreshTokenRepository.findByUserId(user.getUserId())
+                .ifPresentOrElse(
+                        token -> token.update(refreshToken),
+                        () -> refreshTokenRepository.save(new RefreshToken(user.getUserId(), refreshToken))
+                );
+
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -78,6 +88,8 @@ public class UserService {
                 .nickname(user.getNickname())
                 .isNewUser(isNewUser)
                 .build();
+
+
     }
 
     private String getNaverAccessToken(String code, String state) {
@@ -119,5 +131,10 @@ public class UserService {
                 .userId(user.getUserId())
                 .nickname(user.getNickname())
                 .build();
+    }
+
+    //닉네임 중복 체크
+    public boolean checkNickname(String nickname) {
+        return !userRepository.existsByNickname(nickname);
     }
 }

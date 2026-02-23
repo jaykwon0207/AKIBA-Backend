@@ -52,7 +52,6 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-
     public void updateNickname(String nickname) {
         this.nickname = nickname;
     }

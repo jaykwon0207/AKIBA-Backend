@@ -20,6 +20,10 @@ public class Board {
     @Column(nullable = false, length = 50)
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30, unique = true)
+    private BoardCode code;
+
     @Column(length = 200)
     private String description;
 

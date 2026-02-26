@@ -189,4 +189,29 @@ public class UserService {
                 .message("회원정보 수정 성공")
                 .build();
     }
+
+    //리프레시 토큰
+    public RefreshTokenResponse refresh(RefreshTokenRequest request) {
+        // 1 리프레시 토큰 유효성 검증
+        if (!tokenProvider.validToken(request.getRefreshToken())) {
+            throw new RuntimeException("유효하지 않은 리프레시 토큰입니다.");
+        }
+        // 2 리프레시 토큰으로 userId 추출
+        Long userId = tokenProvider.getUserId(request.getRefreshToken());
+        // 3 DB에 저장된 리프레시 토큰과 비교
+        RefreshToken refreshToken = refreshTokenRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("리프레시 토큰을 찾을 수 없습니다."));
+
+        if (!refreshToken.getRefreshToken().equals(request.getRefreshToken())) {
+            throw new RuntimeException("리프레시 토큰이 일치하지 않습니다.");
+        }
+
+        // 4 새 액세스 토큰 발급
+        String newAccessToken = tokenProvider.generateAccessToken(userId);
+
+        return RefreshTokenResponse.builder()
+                .accessToken(newAccessToken)
+                .build();
+    }
+
 }

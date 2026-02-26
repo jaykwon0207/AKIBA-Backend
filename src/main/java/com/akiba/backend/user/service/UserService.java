@@ -1,5 +1,6 @@
 package com.akiba.backend.user.service;
 
+import com.akiba.backend.config.exception.TokenExpiredException;
 import com.akiba.backend.config.jwt.TokenProvider;
 import com.akiba.backend.user.domain.AuthProvider;
 import com.akiba.backend.user.domain.RefreshToken;
@@ -194,7 +195,7 @@ public class UserService {
     public RefreshTokenResponse refresh(RefreshTokenRequest request) {
         // 1 리프레시 토큰 유효성 검증
         if (!tokenProvider.validToken(request.getRefreshToken())) {
-            throw new RuntimeException("유효하지 않은 리프레시 토큰입니다.");
+            throw new TokenExpiredException("리프레시 토큰이 만료되었습니다. 다시 로그인해주세요.");
         }
         // 2 리프레시 토큰으로 userId 추출
         Long userId = tokenProvider.getUserId(request.getRefreshToken());
@@ -213,5 +214,7 @@ public class UserService {
                 .accessToken(newAccessToken)
                 .build();
     }
+
+
 
 }

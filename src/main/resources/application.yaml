@@ -20,8 +20,8 @@ naver:
 
 jwt:
   secret-key: akiba-secret-key-please-change-this-to-random-string
-  access-token-expiry: 3600000
-  refresh-token-expiry: 1209600000
+  access-token-expiry: 86400000 #24시간  3600000 #1시간
+  refresh-token-expiry: 1209600000 #14일
 # naver developers
 # Client ID : ZfdrzEhizfq8bi0KaKTQ
 # Client Secret : 9I4q2EEejE

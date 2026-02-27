@@ -37,3 +37,8 @@ out/
 .vscode/
 
 .env
+.env.local
+.env.*.local
+application.yaml
+application-local.yaml
+application-*-local.yaml

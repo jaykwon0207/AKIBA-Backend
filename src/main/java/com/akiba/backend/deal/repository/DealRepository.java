@@ -12,4 +12,6 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
     List<Deal> findByBuyerId(Long buyerId);
 
     boolean existsByPostId(Long postId);
+
+    int countBySellerIdOrBuyerId(Long sellerId, Long buyerId);
 }

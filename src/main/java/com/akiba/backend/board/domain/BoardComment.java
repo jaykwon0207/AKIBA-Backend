@@ -28,10 +28,22 @@ public class BoardComment {
     @Column(nullable = false, length = 1000)
     private String content;
 
+    private int likeCount;
+
     private LocalDateTime createdAt;
 
     @PrePersist
     void prePersist() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
     }
 }

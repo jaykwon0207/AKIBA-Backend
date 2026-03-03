@@ -1,0 +1,46 @@
+name: Backend CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "dev" ] # main 브랜치에 푸시될 때 배포 실행
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/akiba-backend:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/akiba-backend:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH to EC2 and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # 기존 이미지 삭제 및 업데이트
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/akiba-backend:latest
+            docker stop akiba-app || true
+            docker rm akiba-app || true
+            # 백엔드 컨테이너 실행
+            docker run -d --name akiba-app -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/akiba-backend:latest

@@ -40,18 +40,22 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # 1. 환경 변수 세팅 (이미지 태그용)
+            # 1. 브랜치에 따라 사용할 컴포즈 파일과 서비스명 결정
             BRANCH=${{ github.ref_name }}
-            export IMAGE_TAG=$([ "$BRANCH" == "main" ] && echo "latest" || echo "dev")
-            export SERVICE_NAME=$([ "$BRANCH" == "main" ] && echo "app-prod" || echo "app-dev")
+            
+            # main이면 prod 설정파일/서비스, 아니면(dev) dev 설정파일/서비스 사용
+            COMPOSE_FILE=$([ "$BRANCH" == "main" ] && echo "docker-compose.prod.yml" || echo "docker-compose.dev.yml")
+            SERVICE_NAME=$([ "$BRANCH" == "main" ] && echo "app-prod" || echo "app-dev")
+            
             export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            export IMAGE_TAG=$([ "$BRANCH" == "main" ] && echo "latest" || echo "dev")
 
-            # 2. 서버의 프로젝트 폴더로 이동 (폴더명은 본인 경로에 맞게 수정하세요)
+            # 2. 서버 프로젝트 폴더 이동
             cd /home/ubuntu/
 
-            # 3. 최신 이미지 받아오기
-            docker pull $DOCKERHUB_USERNAME/akiba-backend:$IMAGE_TAG
-
-            # 4. docker-compose로 해당 서비스만 재실행
-            # --no-deps: 의존성 서비스(DB 등)는 건드리지 않고 앱만 재시작
-            docker compose up -d --no-deps $SERVICE_NAME
+            # 3. 해당 환경의 이미지 pull 및 배포 (파일 지정 -f 사용)
+            docker compose -f $COMPOSE_FILE pull $SERVICE_NAME
+            docker compose -f $COMPOSE_FILE up -d --no-deps $SERVICE_NAME
+            
+            # 4. 배포 후 불필요한 이미지 정리
+            docker image prune -f

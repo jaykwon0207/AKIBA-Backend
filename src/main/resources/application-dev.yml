@@ -1,5 +1,5 @@
 spring:
   datasource:
-    url: jdbc:mysql://db-dev:3306/${DEV_DB_NAME}
+    url: jdbc:mysql://db-dev:3307/${DEV_DB_NAME}
     username: root
     password: ${DEV_DB_PASSWORD}

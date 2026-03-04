@@ -45,13 +45,14 @@ jobs:
             export IMAGE_TAG=$([ "$BRANCH" == "main" ] && echo "latest" || echo "dev")
             export SERVICE_NAME=$([ "$BRANCH" == "main" ] && echo "app-prod" || echo "app-dev")
             export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            export COMPOSE_FILENAME=$([ "$BRANCH" == "main" ] && echo "docker-compose.prod.yml" || echo "docker-compose.dev.yml")
 
             # 2. 서버의 프로젝트 폴더로 이동 (폴더명은 본인 경로에 맞게 수정하세요)
             cd /home/ubuntu/
-
+            
             # 3. 최신 이미지 받아오기
             docker pull $DOCKERHUB_USERNAME/akiba-backend:$IMAGE_TAG
 
             # 4. docker-compose로 해당 서비스만 재실행
             # --no-deps: 의존성 서비스(DB 등)는 건드리지 않고 앱만 재시작
-            docker compose up -d --no-deps $SERVICE_NAME
+            docker compose -f $COMPOSE_FILENAME pull

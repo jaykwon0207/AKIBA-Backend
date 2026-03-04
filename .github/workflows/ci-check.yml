@@ -2,7 +2,7 @@ name: CI Check on PR
 
 on:
   pull_request:
-    branches: [ "dev", "main" ] # dev나 main으로 향하는 모든 PR에서 작동
+    branches: [ "develop", "main" ] # dev나 main으로 향하는 모든 PR에서 작동
 
 jobs:
   build-and-test:

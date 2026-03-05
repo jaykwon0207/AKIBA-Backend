@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @Builder
 public class UserProfile {
 
+    private String profileImageUrl; // 필드명이 정확히 일치해야 합니다
+
     @Id
     private Long userId;
 

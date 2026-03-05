@@ -2,6 +2,7 @@ package com.akiba.backend.config;
 
 import com.akiba.backend.config.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -41,5 +42,6 @@ public class SecurityConfig {
                          */
                 )
                 .build();
+
     }
 }

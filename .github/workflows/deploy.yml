@@ -39,6 +39,7 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
           script: |
             # 1. 환경 변수 세팅 (이미지 태그용)
             BRANCH=${{ github.ref_name }}

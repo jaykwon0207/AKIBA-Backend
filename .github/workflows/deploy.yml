@@ -46,6 +46,7 @@ jobs:
             
             echo "DB_NAME=${{ env.DB_NAME }}" > ${{ env.CONFIG_DIR }}/.env
             echo "DB_PASSWORD=${{ env.DB_PASSWORD }}" >> ${{ env.CONFIG_DIR }}/.env
+            echo "DOCKERHUB_USERNAME=${{ env.DOCKERHUB_USERNAME }}" >> ${{ env.CONFIG_DIR }}/.env
 
             echo "${{ secrets.APPLICATION_YML }}" > ${{ env.CONFIG_DIR }}/application.yml
             

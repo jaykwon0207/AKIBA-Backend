@@ -31,6 +31,7 @@ jobs:
       IS_PROD: ${{ github.ref_name == 'main' }}
       DB_PASSWORD: ${{ github.ref_name == 'main' && secrets.PROD_DB_PASSWORD || secrets.DEV_DB_PASSWORD }}
       DB_NAME: ${{ github.ref_name == 'main' && secrets.PROD_DB_NAME || secrets.DEV_DB_NAME }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
     steps:
       - name: SSH to EC2 and Deploy
         uses: appleboy/ssh-action@master
@@ -51,5 +52,6 @@ jobs:
             cd /home/ubuntu/docker
             
             export TAG=${{ github.ref_name == 'main' && 'latest' || 'dev' }}
+
             docker compose -f ${{ env.IS_PROD && 'docker-compose.app.prod.yml' || 'docker-compose.app.dev.yml' }} pull
             docker compose -f ${{ env.IS_PROD && 'docker-compose.app.prod.yml' || 'docker-compose.app.dev.yml' }} up -d

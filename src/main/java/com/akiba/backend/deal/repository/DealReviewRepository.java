@@ -10,4 +10,6 @@ public interface DealReviewRepository extends JpaRepository<DealReview, Long> {
     List<DealReview> findByRevieweeId(Long revieweeId);
 
     boolean existsByDealIdAndReviewerId(Long dealId, Long reviewerId);
+
+    int countByRevieweeId(Long revieweeId);
 }

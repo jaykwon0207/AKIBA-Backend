@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @Builder
 public class UserProfile {
 
+    private String profileImageUrl; // 필드명이 정확히 일치해야 합니다
+
     @Id
     private Long userId;
 
@@ -42,6 +44,14 @@ public class UserProfile {
         if (this.mannerScore == null) {
             this.mannerScore = 36.5; // 기본값
         }
+    }
+
+    public void updateBio(String bio) {
+        this.bio = bio;
+    }
+
+    public void updateProfileImage(Long profileImageMediaId) {
+        this.profileImageMediaId = profileImageMediaId;
     }
 
     @PreUpdate

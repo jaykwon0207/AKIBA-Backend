@@ -1,0 +1,62 @@
+name: Backend CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        run: |
+          # 브랜치별로 다른 태그 생성 (main -> latest, dev -> dev)
+          TAG=${{ github.ref_name == 'main' && 'latest' || 'dev' }}
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/akiba-backend:$TAG .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/akiba-backend:$TAG
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    env:
+      CONFIG_DIR: "/home/ubuntu/docker/backend/config-${{ github.ref_name == 'main' && 'prod' || 'dev' }}"
+      BASE_DIR: "/home/ubuntu/docker/backend/"
+      DB_PASSWORD: ${{ github.ref_name == 'main' && secrets.PROD_DB_PASSWORD || secrets.DEV_DB_PASSWORD }}
+      DB_NAME: ${{ github.ref_name == 'main' && secrets.PROD_DB_NAME || secrets.DEV_DB_NAME }}
+      DOCKER_COMPOSE_FILE: ${{ github.ref_name == 'main' && 'docker-compose.app.prod.yml' || 'docker-compose.app.dev.yml' }}
+    steps:
+      - name: SSH to EC2 and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            
+            mkdir -p ${{ env.CONFIG_DIR }}
+
+            {
+              echo "DB_NAME=${{ env.DB_NAME }}"
+              echo "DB_PASSWORD=${{ env.DB_PASSWORD }}"
+              echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}"
+              echo "NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}"
+              echo "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}"
+              echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}"
+            } > ${{ env.CONFIG_DIR }}/.env
+
+            
+            cd ${{ env.BASE_DIR }}/
+            
+            export TAG=${{ github.ref_name == 'main' && 'latest' || 'dev' }}
+
+            docker compose -f  ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CONFIG_DIR }}/.env pull
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CONFIG_DIR }}/.env up -d

@@ -54,5 +54,5 @@ jobs:
             
             export TAG=${{ github.ref_name == 'main' && 'latest' || 'dev' }}
 
-            docker compose -f  ${{ env.DOCKER_COMPOSE_FILE }}  pull
-            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} up -d
+            docker compose -f  ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CONFIG_DIR }}/.env pull
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CONFIG_DIR }}/.env up -d

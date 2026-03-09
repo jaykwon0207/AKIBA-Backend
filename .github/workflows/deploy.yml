@@ -27,11 +27,11 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     env:
-      CONFIG_DIR: "/home/ubuntu/docker/config-${{ github.ref_name == 'main' && 'prod' || 'dev' }}"
-      IS_PROD: ${{ github.ref_name == 'main' }}
+      CONFIG_DIR: "/home/ubuntu/docker/backend/config-${{ github.ref_name == 'main' && 'prod' || 'dev' }}"
+      BASE_DIR: "/home/ubuntu/docker/backend/"
       DB_PASSWORD: ${{ github.ref_name == 'main' && secrets.PROD_DB_PASSWORD || secrets.DEV_DB_PASSWORD }}
       DB_NAME: ${{ github.ref_name == 'main' && secrets.PROD_DB_NAME || secrets.DEV_DB_NAME }}
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKER_COMPOSE_FILE: ${{ github.ref_name == 'main' && 'docker-compose.app.prod.yml' || 'docker-compose.app.dev.yml' }}
     steps:
       - name: SSH to EC2 and Deploy
         uses: appleboy/ssh-action@master
@@ -46,13 +46,13 @@ jobs:
             
             echo "DB_NAME=${{ env.DB_NAME }}" > ${{ env.CONFIG_DIR }}/.env
             echo "DB_PASSWORD=${{ env.DB_PASSWORD }}" >> ${{ env.CONFIG_DIR }}/.env
-            echo "DOCKERHUB_USERNAME=${{ env.DOCKERHUB_USERNAME }}" >> ${{ env.CONFIG_DIR }}/.env
+            echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> ${{ env.CONFIG_DIR }}/.env
 
             echo "${{ secrets.APPLICATION_YML }}" > ${{ env.CONFIG_DIR }}/application.yml
             
-            cd /home/ubuntu/docker
+            cd ${{ env.BASE_DIR }}/
             
             export TAG=${{ github.ref_name == 'main' && 'latest' || 'dev' }}
 
-            docker compose -f ${{ env.IS_PROD && 'docker-compose.app.prod.yml' || 'docker-compose.app.dev.yml' }} pull
-            docker compose -f ${{ env.IS_PROD && 'docker-compose.app.prod.yml' || 'docker-compose.app.dev.yml' }} up -d
+            docker compose -f  ${{ env.DOCKER_COMPOSE_FILE }}  pull
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} up -d

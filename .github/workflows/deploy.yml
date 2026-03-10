@@ -58,5 +58,7 @@ jobs:
             cd ${{ env.BASE_DIR }}/
             
 
-            docker compose -f  ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CONFIG_DIR }}/.env pull
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CONFIG_DIR }}/.env pull
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CONFIG_DIR }}/.env down
             docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CONFIG_DIR }}/.env up -d
+            

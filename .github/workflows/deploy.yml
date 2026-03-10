@@ -55,5 +55,5 @@ jobs:
             } > ${{ env.CONFIG_DIR }}/.env
 
             cd ${{ env.BASE_DIR }}
-            bash /deploy.sh ${{ env.DOCKER_COMPOSE_FILE }} ${{ env.CONFIG_DIR }}/.env
+            bash deploy.sh ${{ env.DOCKER_COMPOSE_FILE }} ${{ env.CONFIG_DIR }}/.env
             

@@ -53,7 +53,7 @@ jobs:
               echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}"
               echo "TAG=${{ github.ref_name == 'main' && 'latest' || 'dev' }}"
             } > ${{ env.CONFIG_DIR }}/.env
-            
-            mv ${{ env.BASE_DIR }}
+
+            cd ${{ env.BASE_DIR }}
             bash /deploy.sh ${{ env.DOCKER_COMPOSE_FILE }} ${{ env.CONFIG_DIR }}/.env
             

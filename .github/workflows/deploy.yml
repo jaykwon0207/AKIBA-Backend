@@ -52,11 +52,7 @@ jobs:
               echo "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}"
               echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}"
               echo "TAG=${{ github.ref_name == 'main' && 'latest' || 'dev' }}"
-            } > ${{ env.CONFIG_DIR }}/.env
+            } > ${{ env.CONFIG_DIR }}/.env    
 
+            bash ${{ env.BASE_DIR }}/deploy.sh ${{ env.DOCKER_COMPOSE_FILE }} ${{ env.CONFIG_DIR }}/.env
             
-            cd ${{ env.BASE_DIR }}/
-            
-
-            docker compose -f  ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CONFIG_DIR }}/.env pull
-            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CONFIG_DIR }}/.env up -d

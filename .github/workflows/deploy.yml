@@ -32,6 +32,7 @@ jobs:
       DB_PASSWORD: ${{ github.ref_name == 'main' && secrets.PROD_DB_PASSWORD || secrets.DEV_DB_PASSWORD }}
       DB_NAME: ${{ github.ref_name == 'main' && secrets.PROD_DB_NAME || secrets.DEV_DB_NAME }}
       DOCKER_COMPOSE_FILE: ${{ github.ref_name == 'main' && 'docker-compose.app.prod.yml' || 'docker-compose.app.dev.yml' }}
+      HOST_PORT: ${{ github.ref_name == 'main' && 8080 || 8081 }}
     steps:
       - name: SSH to EC2 and Deploy
         uses: appleboy/ssh-action@master
@@ -55,5 +56,5 @@ jobs:
             } > ${{ env.CONFIG_DIR }}/.env
 
             cd ${{ env.BASE_DIR }}
-            bash deploy.sh ${{ env.DOCKER_COMPOSE_FILE }} ${{ env.CONFIG_DIR }}/.env
+            bash deploy.sh ${{ env.DOCKER_COMPOSE_FILE }} ${{ env.CONFIG_DIR }}/.env ${{ env.HOST_PORT }}
             

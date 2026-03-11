@@ -9,12 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
 
       - name: Login to DockerHub
         uses: docker/login-action@v3
@@ -32,6 +26,12 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
+    env:
+      CONFIG_DIR: "/home/ubuntu/docker/backend/config-${{ github.ref_name == 'main' && 'prod' || 'dev' }}"
+      BASE_DIR: "/home/ubuntu/docker/backend/"
+      DB_PASSWORD: ${{ github.ref_name == 'main' && secrets.PROD_DB_PASSWORD || secrets.DEV_DB_PASSWORD }}
+      DB_NAME: ${{ github.ref_name == 'main' && secrets.PROD_DB_NAME || secrets.DEV_DB_NAME }}
+      DOCKER_COMPOSE_FILE: ${{ github.ref_name == 'main' && 'docker-compose.app.prod.yml' || 'docker-compose.app.dev.yml' }}
     steps:
       - name: SSH to EC2 and Deploy
         uses: appleboy/ssh-action@master
@@ -39,21 +39,25 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
           script: |
-            # 1. 환경 변수 세팅 (이미지 태그용)
-            BRANCH=${{ github.ref_name }}
-            export IMAGE_TAG=$([ "$BRANCH" == "main" ] && echo "latest" || echo "dev")
-            export SERVICE_NAME=$([ "$BRANCH" == "main" ] && echo "app-prod" || echo "app-dev")
-            export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-            export COMPOSE_FILENAME=$([ "$BRANCH" == "main" ] && echo "docker-compose.prod.yml" || echo "docker-compose.dev.yml")
-
-            # 2. 서버의 프로젝트 폴더로 이동 (폴더명은 본인 경로에 맞게 수정하세요)
-            cd /home/ubuntu/
             
-            # 3. 최신 이미지 받아오기
-            docker pull $DOCKERHUB_USERNAME/akiba-backend:$IMAGE_TAG
+            mkdir -p ${{ env.CONFIG_DIR }}
 
-            # 4. docker-compose로 해당 서비스만 재실행
-            # --no-deps: 의존성 서비스(DB 등)는 건드리지 않고 앱만 재시작
-            docker compose -f $COMPOSE_FILENAME pull
-            docker compose -f $COMPOSE_FILENAME up -d
+            export TAG=${{ github.ref_name == 'main' && 'latest' || 'dev' }}
+            export HOST_PORT=${{ github.ref_name == 'main' && '8080' || '8081' }}
+            export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+
+            {
+              echo "DB_NAME=${{ env.DB_NAME }}"
+              echo "DB_PASSWORD=${{ env.DB_PASSWORD }}"
+              echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}"
+              echo "NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}"
+              echo "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}"
+              echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}"
+              echo "TAG=${{ github.ref_name == 'main' && 'latest' || 'dev' }}"
+            } > ${{ env.CONFIG_DIR }}/.env
+
+            cd ${{ env.BASE_DIR }}
+            bash deploy.sh ${{ env.DOCKER_COMPOSE_FILE }} ${{ env.CONFIG_DIR }}/.env
+            

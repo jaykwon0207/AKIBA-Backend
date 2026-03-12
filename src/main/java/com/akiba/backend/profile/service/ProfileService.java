@@ -2,7 +2,9 @@ package com.akiba.backend.profile.service;
 
 import com.akiba.backend.config.exception.AlreadyFollowingException;
 import com.akiba.backend.config.exception.SelfFollowException;
+import com.akiba.backend.profile.dto.FollowListResponse;
 import com.akiba.backend.profile.dto.FollowResponse;
+import com.akiba.backend.profile.dto.FollowUserResponse;
 import com.akiba.backend.profile.dto.ProfileResponse;
 import com.akiba.backend.user.domain.Follow;
 import com.akiba.backend.user.domain.FollowId;
@@ -13,6 +15,8 @@ import com.akiba.backend.user.repository.UserProfileRepository;
 import com.akiba.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -82,6 +86,54 @@ public class ProfileService {
     }
 
 
+
+    public FollowListResponse getFollowings(Long userId) {
+        List<Follow> follows = followRepository.findByFollowerId(userId);
+
+        List<FollowUserResponse> followings = follows.stream()
+                .map(follow -> {
+                    User user = userRepository.findById(follow.getFollowingId())
+                            .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+                    UserProfile profile = userProfileRepository.findByUserId(user.getUserId())
+                            .orElseThrow(() -> new RuntimeException("프로필을 찾을 수 없습니다."));
+                    return FollowUserResponse.builder()
+                            .userId(user.getUserId())
+                            .nickname(user.getNickname())
+                            .profileImageUrl(profile.getProfileImageUrl())
+                            .mannerScore(profile.getMannerScore())
+                            .build();
+                })
+                .toList();
+
+        return FollowListResponse.builder()
+                .followings(followings)
+                .totalCount(followings.size())
+                .build();
+    }
+
+    public FollowListResponse getFollowers(Long userId) {
+        List<Follow> follows = followRepository.findByFollowingId(userId);
+
+        List<FollowUserResponse> followers = follows.stream()
+                .map(follow -> {
+                    User user = userRepository.findById(follow.getFollowerId())
+                            .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+                    UserProfile profile = userProfileRepository.findByUserId(user.getUserId())
+                            .orElseThrow(() -> new RuntimeException("프로필을 찾을 수 없습니다."));
+                    return FollowUserResponse.builder()
+                            .userId(user.getUserId())
+                            .nickname(user.getNickname())
+                            .profileImageUrl(profile.getProfileImageUrl())
+                            .mannerScore(profile.getMannerScore())
+                            .build();
+                })
+                .toList();
+
+        return FollowListResponse.builder()
+                .followings(followers)
+                .totalCount(followers.size())
+                .build();
+    }
 
 
 }

@@ -14,4 +14,6 @@ public class ProfileResponse {
     private Integer ongoingDealCount;
     private Long followerCount;
     private Long followingCount;
+    private Boolean isFollowing;
+
 }

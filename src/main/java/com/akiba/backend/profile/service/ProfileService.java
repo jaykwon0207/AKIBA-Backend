@@ -26,15 +26,16 @@ public class ProfileService {
     private final UserProfileRepository userProfileRepository;
     private final FollowRepository followRepository;
 
-    public ProfileResponse getUserProfile(Long userId) {
-        User user = userRepository.findById(userId)
+    public ProfileResponse getUserProfile(Long myId, Long targetId) {
+        User user = userRepository.findById(targetId)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
-        UserProfile userProfile = userProfileRepository.findByUserId(userId)
+        UserProfile userProfile = userProfileRepository.findByUserId(targetId)
                 .orElseThrow(() -> new RuntimeException("프로필을 찾을 수 없습니다."));
 
-        long followerCount = followRepository.countByFollowingId(userId);
-        long followingCount = followRepository.countByFollowerId(userId);
+        long followerCount = followRepository.countByFollowingId(targetId);
+        long followingCount = followRepository.countByFollowerId(targetId);
+        boolean isFollowing = followRepository.existsById(new FollowId(myId, targetId));
 
         return ProfileResponse.builder()
                 .userId(user.getUserId())
@@ -45,6 +46,7 @@ public class ProfileService {
                 .ongoingDealCount(0)
                 .followerCount(followerCount)
                 .followingCount(followingCount)
+                .isFollowing(isFollowing)
                 .build();
     }
     public FollowResponse follow(Long followerId, Long targetId) {

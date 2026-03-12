@@ -18,12 +18,14 @@ public class ProfileController {
 
     @GetMapping("/me")
     public ResponseEntity<ProfileResponse> getMyProfile(@AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok(profileService.getUserProfile(userId));
+        return ResponseEntity.ok(profileService.getUserProfile(userId,userId));
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<ProfileResponse> getUserProfile(@PathVariable Long userId) {
-        return ResponseEntity.ok(profileService.getUserProfile(userId));
+    @GetMapping("/{targetId}")
+    public ResponseEntity<ProfileResponse> getUserProfile(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long targetId) {
+        return ResponseEntity.ok(profileService.getUserProfile(userId, targetId));
     }
 
     @PostMapping("/{targetId}/follow")

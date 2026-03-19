@@ -15,4 +15,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("message", e.getMessage()));
     }
+
+    @ExceptionHandler(SelfFollowException.class)
+    public ResponseEntity<Map<String, String>> handleSelfFollowException(SelfFollowException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("message", e.getMessage()));
+    }
+
+    @ExceptionHandler(AlreadyFollowingException.class)
+    public ResponseEntity<Map<String, String>> handleAlreadyFollowingException(AlreadyFollowingException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("message", e.getMessage()));
+    }
 }
